@@ -12,7 +12,8 @@ import {
   UsersIcon,
   SearchIcon,
   BellIcon,
-  SettingsIcon
+  SettingsIcon,
+  CalendarIcon
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -74,6 +75,12 @@ const menuItems: MenuItem[] = [
     icon: NotebookPenIcon,
     label: 'EOD Report',
     href: '/eod-report',
+    roles: ['admin', 'sms_va', 'underwriter']
+  },
+  {
+    icon: CalendarIcon,
+    label: 'Calendar',
+    href: '/calendar',
     roles: ['admin', 'sms_va', 'underwriter']
   }
 ]
