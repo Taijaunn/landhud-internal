@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
 
-export default function Page() {
-  redirect('/dashboard-shell-06')
+export default function HomePage() {
+  redirect('/dashboard')
 }
