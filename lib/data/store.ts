@@ -12,7 +12,8 @@ import type {
   QuizAttempt,
   UserTrainingProgress,
   Resource,
-  CalendarEvent
+  CalendarEvent,
+  LeadList
 } from '@/lib/types'
 
 // Generate unique IDs
@@ -1069,5 +1070,52 @@ export const useCalendarStore = create<CalendarState>()(
       }
     }),
     { name: 'landhud-calendar' }
+  )
+)
+
+// Lead Lists store (for incoming LandPortal files)
+interface LeadListsState {
+  leadLists: LeadList[]
+  addLeadList: (list: Omit<LeadList, 'id' | 'receivedAt'>) => string
+  updateLeadList: (id: string, updates: Partial<LeadList>) => void
+  deleteLeadList: (id: string) => void
+  getLeadListsByStatus: (status: LeadList['status']) => LeadList[]
+}
+
+export const useLeadListsStore = create<LeadListsState>()(
+  persist(
+    (set, get) => ({
+      leadLists: [],
+      
+      addLeadList: (listData) => {
+        const id = generateId()
+        const newList: LeadList = {
+          ...listData,
+          id,
+          receivedAt: new Date().toISOString()
+        }
+        set((state) => ({ leadLists: [newList, ...state.leadLists] }))
+        return id
+      },
+      
+      updateLeadList: (id, updates) => {
+        set((state) => ({
+          leadLists: state.leadLists.map((list) =>
+            list.id === id ? { ...list, ...updates } : list
+          )
+        }))
+      },
+      
+      deleteLeadList: (id) => {
+        set((state) => ({
+          leadLists: state.leadLists.filter((list) => list.id !== id)
+        }))
+      },
+      
+      getLeadListsByStatus: (status) => {
+        return get().leadLists.filter((list) => list.status === status)
+      }
+    }),
+    { name: 'landhud-lead-lists' }
   )
 )

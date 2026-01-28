@@ -13,7 +13,14 @@ import {
   SearchIcon,
   BellIcon,
   SettingsIcon,
-  CalendarIcon
+  CalendarIcon,
+  FileSpreadsheetIcon,
+  ChevronRightIcon,
+  BriefcaseIcon,
+  FileTextIcon,
+  GraduationCapIcon,
+  ShieldIcon,
+  DatabaseIcon
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -30,9 +37,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
   SidebarTrigger
 } from '@/components/ui/sidebar'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 
 import LogoSvg from '@/assets/svg/logo'
 import { RoleSelector } from '@/components/landhud/role-selector'
@@ -43,69 +58,169 @@ type MenuItem = {
   icon: ComponentType
   label: string
   href: string
-  roles: UserRole[] // Which roles can see this menu item
+  roles: UserRole[]
 }
 
-const menuItems: MenuItem[] = [
+type MenuSection = {
+  icon: ComponentType
+  label: string
+  roles: UserRole[]
+  items: MenuItem[]
+}
+
+// Organized menu sections
+const menuSections: MenuSection[] = [
   {
-    icon: ChartColumnStackedIcon,
-    label: 'Dashboard',
-    href: '/dashboard',
-    roles: ['admin', 'sms_va', 'underwriter']
+    icon: BriefcaseIcon,
+    label: 'Operations',
+    roles: ['admin', 'sms_va', 'underwriter'],
+    items: [
+      {
+        icon: ChartColumnStackedIcon,
+        label: 'Dashboard',
+        href: '/dashboard',
+        roles: ['admin', 'sms_va', 'underwriter']
+      },
+      {
+        icon: UsersIcon,
+        label: 'Submit Lead',
+        href: '/leads',
+        roles: ['admin', 'sms_va']
+      },
+      {
+        icon: SearchIcon,
+        label: 'Valuations',
+        href: '/valuations',
+        roles: ['admin', 'underwriter']
+      },
+      {
+        icon: FileSpreadsheetIcon,
+        label: 'Lead Lists',
+        href: '/lead-lists',
+        roles: ['admin', 'sms_va']
+      },
+      {
+        icon: DatabaseIcon,
+        label: 'Records',
+        href: '/records',
+        roles: ['admin', 'sms_va', 'underwriter']
+      }
+    ]
   },
   {
-    icon: UsersIcon,
-    label: 'Submit Lead',
-    href: '/leads',
-    roles: ['admin', 'sms_va']
+    icon: FileTextIcon,
+    label: 'Reports',
+    roles: ['admin', 'sms_va', 'underwriter'],
+    items: [
+      {
+        icon: NotebookPenIcon,
+        label: 'EOD Report',
+        href: '/eod-report',
+        roles: ['admin', 'sms_va', 'underwriter']
+      },
+      {
+        icon: CalendarIcon,
+        label: 'Calendar',
+        href: '/calendar',
+        roles: ['admin', 'sms_va', 'underwriter']
+      }
+    ]
   },
   {
-    icon: SearchIcon,
-    label: 'Valuations',
-    href: '/valuations',
-    roles: ['admin', 'underwriter']
-  },
-  {
-    icon: BookMarkedIcon,
-    label: 'Training',
-    href: '/training',
-    roles: ['admin', 'sms_va', 'underwriter']
-  },
-  {
-    icon: NotebookPenIcon,
-    label: 'EOD Report',
-    href: '/eod-report',
-    roles: ['admin', 'sms_va', 'underwriter']
-  },
-  {
-    icon: CalendarIcon,
-    label: 'Calendar',
-    href: '/calendar',
-    roles: ['admin', 'sms_va', 'underwriter']
+    icon: GraduationCapIcon,
+    label: 'Resources',
+    roles: ['admin', 'sms_va', 'underwriter'],
+    items: [
+      {
+        icon: BookMarkedIcon,
+        label: 'Training',
+        href: '/training',
+        roles: ['admin', 'sms_va', 'underwriter']
+      }
+    ]
   }
 ]
 
-const adminItems: MenuItem[] = [
-  {
-    icon: ClipboardListIcon,
-    label: 'All Leads',
-    href: '/admin/leads',
-    roles: ['admin']
-  },
-  {
-    icon: SettingsIcon,
-    label: 'Settings',
-    href: '/admin/settings',
-    roles: ['admin']
-  }
-]
+const adminSection: MenuSection = {
+  icon: ShieldIcon,
+  label: 'Admin',
+  roles: ['admin'],
+  items: [
+    {
+      icon: ClipboardListIcon,
+      label: 'All Leads',
+      href: '/admin/leads',
+      roles: ['admin']
+    },
+    {
+      icon: SettingsIcon,
+      label: 'Settings',
+      href: '/admin/settings',
+      roles: ['admin']
+    }
+  ]
+}
+
+function CollapsibleSection({ 
+  section, 
+  pathname, 
+  currentRole 
+}: { 
+  section: MenuSection
+  pathname: string
+  currentRole: UserRole
+}) {
+  const visibleItems = section.items.filter(item => item.roles.includes(currentRole))
+  
+  if (visibleItems.length === 0) return null
+  
+  // Check if any item in this section is active
+  const isActive = visibleItems.some(item => pathname === item.href)
+  
+  return (
+    <Collapsible defaultOpen={isActive} className="group/collapsible">
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton tooltip={section.label}>
+            <section.icon />
+            <span>{section.label}</span>
+            <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {visibleItems.map((item) => (
+              <SidebarMenuSubItem key={item.href}>
+                <SidebarMenuSubButton 
+                  asChild
+                  isActive={pathname === item.href}
+                >
+                  <Link href={item.href}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  )
+}
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const { currentRole, currentUserName } = useUserStore()
 
-  const visibleMenuItems = menuItems.filter(item => item.roles.includes(currentRole))
-  const visibleAdminItems = adminItems.filter(item => item.roles.includes(currentRole))
+  // Filter sections that have at least one visible item for current role
+  const visibleSections = menuSections.filter(section => 
+    section.roles.includes(currentRole) &&
+    section.items.some(item => item.roles.includes(currentRole))
+  )
+  
+  const showAdminSection = adminSection.roles.includes(currentRole) &&
+    adminSection.items.some(item => item.roles.includes(currentRole))
 
   return (
     <div className="bg-muted flex min-h-dvh w-full">
@@ -126,46 +241,31 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Main</SidebarGroupLabel>
+              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {visibleMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton 
-                        tooltip={item.label} 
-                        asChild
-                        isActive={pathname === item.href}
-                      >
-                        <Link href={item.href}>
-                          <item.icon />
-                          <span>{item.label}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                  {visibleSections.map((section) => (
+                    <CollapsibleSection 
+                      key={section.label}
+                      section={section}
+                      pathname={pathname}
+                      currentRole={currentRole}
+                    />
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
 
-            {visibleAdminItems.length > 0 && (
+            {showAdminSection && (
               <SidebarGroup>
-                <SidebarGroupLabel>Admin</SidebarGroupLabel>
+                <SidebarGroupLabel>Administration</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {visibleAdminItems.map((item) => (
-                      <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton 
-                          tooltip={item.label} 
-                          asChild
-                          isActive={pathname === item.href}
-                        >
-                          <Link href={item.href}>
-                            <item.icon />
-                            <span>{item.label}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
+                    <CollapsibleSection 
+                      section={adminSection}
+                      pathname={pathname}
+                      currentRole={currentRole}
+                    />
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>

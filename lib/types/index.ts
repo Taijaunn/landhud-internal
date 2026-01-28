@@ -196,3 +196,26 @@ export interface CalendarEvent {
   createdBy: string
   color?: string
 }
+
+// Lead Lists (from LandPortal via N8N)
+export interface LeadList {
+  id: string
+  fileName: string
+  originalFileName: string
+  source: 'landportal' | 'manual' | 'other'
+  status: 'incoming' | 'scrubbing' | 'ready' | 'uploaded_to_launchcontrol' | 'error'
+  recordCount?: number
+  county?: string
+  state?: string
+  receivedAt: string
+  processedAt?: string
+  uploadedAt?: string
+  errorMessage?: string
+  downloadUrl?: string
+  metadata?: {
+    emailSubject?: string
+    emailFrom?: string
+    lastSaleDate?: string
+    acreageRange?: string
+  }
+}
