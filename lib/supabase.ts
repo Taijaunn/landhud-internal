@@ -1,10 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 // Client-side Supabase client (uses anon key)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Only create if environment variables are available (handles build time)
+let supabaseClient: SupabaseClient | null = null
+
+if (supabaseUrl && supabaseAnonKey) {
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+}
+
+export const supabase = supabaseClient as SupabaseClient
 
 // Server-side Supabase client (uses service role key for admin operations)
 export function createServerClient() {

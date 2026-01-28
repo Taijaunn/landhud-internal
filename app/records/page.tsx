@@ -15,6 +15,11 @@ export default function RecordsPage() {
   async function fetchRecords() {
     try {
       setLoading(true)
+      
+      if (!supabase) {
+        throw new Error('Supabase client not initialized. Check environment variables.')
+      }
+      
       const { data, error } = await supabase
         .from('records')
         .select('*')
@@ -31,6 +36,10 @@ export default function RecordsPage() {
 
   async function markAsLaunched(id: string) {
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized')
+      }
+      
       const { error } = await supabase
         .from('records')
         .update({ status: 'launched' })
