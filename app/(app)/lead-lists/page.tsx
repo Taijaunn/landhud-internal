@@ -155,10 +155,18 @@ export default function LeadListsPage() {
             Incoming lead lists from LandPortal, ready for LaunchControl
           </p>
         </div>
-        <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
-          <RefreshCwIcon className={`size-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
+            <RefreshCwIcon className={`size-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button asChild>
+            <a href="/lead-lists/upload">
+              <UploadCloudIcon className="size-4 mr-2" />
+              Upload List
+            </a>
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
