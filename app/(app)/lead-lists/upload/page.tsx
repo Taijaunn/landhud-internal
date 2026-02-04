@@ -67,11 +67,13 @@ export default function UploadLeadListPage() {
   // Handle file selection
   const handleFileSelect = useCallback((selectedFile: File) => {
     // Validate file type
-    if (!selectedFile.name.endsWith('.csv')) {
+    const validExtensions = ['.csv', '.xlsx', '.xls']
+    const hasValidExtension = validExtensions.some(ext => selectedFile.name.toLowerCase().endsWith(ext))
+    if (!hasValidExtension) {
       setProcessingStatus({
         status: 'error',
         progress: 0,
-        message: 'Please upload a CSV file',
+        message: 'Please upload a CSV or Excel file (.csv, .xlsx, .xls)',
         error: 'Invalid file type',
       })
       return
@@ -286,7 +288,7 @@ export default function UploadLeadListPage() {
             Upload CSV File
           </CardTitle>
           <CardDescription>
-            Drag and drop your CSV file or click to browse
+            Drag and drop your CSV or Excel file or click to browse
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -310,7 +312,7 @@ export default function UploadLeadListPage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv"
+              accept=".csv,.xlsx,.xls"
               onChange={handleInputChange}
               className="hidden"
               disabled={isProcessing}
@@ -345,7 +347,7 @@ export default function UploadLeadListPage() {
                   {isDragging ? 'Drop your file here' : 'Click or drag to upload'}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  CSV files only, max 50MB
+                  CSV or Excel files (.csv, .xlsx, .xls), max 50MB
                 </p>
               </>
             )}

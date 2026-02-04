@@ -203,7 +203,7 @@ export interface LeadList {
   fileName: string
   originalFileName: string
   source: 'landportal' | 'manual' | 'other'
-  status: 'incoming' | 'scrubbing' | 'ready' | 'uploaded_to_launchcontrol' | 'error'
+  status: 'incoming' | 'scrubbing' | 'ready' | 'uploaded_to_launchcontrol' | 'cancelled' | 'error'
   recordCount?: number
   county?: string
   state?: string

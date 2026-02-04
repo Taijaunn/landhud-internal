@@ -32,9 +32,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    if (!file.name.endsWith('.csv')) {
+    const validExtensions = ['.csv', '.xlsx', '.xls']
+    const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
+    if (!validExtensions.includes(fileExtension)) {
       return NextResponse.json(
-        { success: false, error: 'Only CSV files are allowed' },
+        { success: false, error: 'Only CSV and Excel files (.csv, .xlsx, .xls) are allowed' },
         { status: 400 }
       )
     }
@@ -53,7 +55,15 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now()
     const sanitizedCounty = county.toLowerCase().replace(/[^a-z0-9]/g, '-')
     const sanitizedState = state.toLowerCase()
-    const fileName = `${sanitizedCounty}-${sanitizedState}-${timestamp}.csv`
+    const fileName = `${sanitizedCounty}-${sanitizedState}-${timestamp}${fileExtension}`
+
+    // Determine content type
+    const contentTypeMap: Record<string, string> = {
+      '.csv': 'text/csv',
+      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      '.xls': 'application/vnd.ms-excel',
+    }
+    const contentType = contentTypeMap[fileExtension] || 'application/octet-stream'
 
     // Convert file to buffer for upload
     const arrayBuffer = await file.arrayBuffer()
@@ -63,7 +73,7 @@ export async function POST(request: NextRequest) {
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('lead-lists')
       .upload(fileName, buffer, {
-        contentType: 'text/csv',
+        contentType,
         upsert: false,
       })
 

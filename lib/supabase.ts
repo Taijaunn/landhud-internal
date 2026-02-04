@@ -23,7 +23,7 @@ export function createServerClient() {
   if (!serviceRoleKey) {
     throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set')
   }
-  return createClient(url, serviceRoleKey)
+  return createClient(url as string, serviceRoleKey as string)
 }
 
 // Database types
