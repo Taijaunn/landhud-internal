@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 
+// Route segment config - allow larger file uploads
+export const runtime = 'nodejs' // Use Node.js runtime (not edge) for larger files
+export const maxDuration = 60 // Allow up to 60 seconds for large file processing
+
 // N8N webhook URL - update this after setting up the workflow
 const N8N_WEBHOOK_URL = process.env.N8N_LEAD_LIST_WEBHOOK_URL || 'https://landhud.app.n8n.cloud/webhook/lead-list-upload'
 
