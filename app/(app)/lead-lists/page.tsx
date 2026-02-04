@@ -12,7 +12,8 @@ import {
   TrashIcon,
   MapPinIcon,
   CalendarIcon,
-  FileIcon
+  FileIcon,
+  XCircleIcon
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -61,6 +62,11 @@ const statusConfig: Record<LeadList['status'], { label: string; color: string; i
     label: 'Uploaded', 
     color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
     icon: <UploadCloudIcon className="size-3" />
+  },
+  cancelled: { 
+    label: 'Cancelled', 
+    color: 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20',
+    icon: <AlertCircleIcon className="size-3" />
   },
   error: { 
     label: 'Error', 
@@ -125,7 +131,53 @@ export default function LeadListsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    deleteLeadList(id)
+    try {
+      const response = await fetch('/api/lead-lists/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        // Remove from local store
+        deleteLeadList(id)
+        // Remove from server lists state
+        setServerLists(prev => prev.filter(l => l.id !== id))
+      } else {
+        console.error('Failed to delete:', data.error)
+        alert(`Failed to delete: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('Failed to delete record')
+    }
+  }
+
+  const handleCancel = async (id: string) => {
+    try {
+      const response = await fetch('/api/lead-lists/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, cancel: true })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        // Remove from local store
+        deleteLeadList(id)
+        // Remove from server lists state
+        setServerLists(prev => prev.filter(l => l.id !== id))
+      } else {
+        console.error('Failed to cancel:', data.error)
+        alert(`Failed to cancel: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Cancel error:', error)
+      alert('Failed to cancel scrubbing')
+    }
   }
 
   // Combine local and server lists, prioritizing local updates
@@ -155,10 +207,18 @@ export default function LeadListsPage() {
             Incoming lead lists from LandPortal, ready for LaunchControl
           </p>
         </div>
-        <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
-          <RefreshCwIcon className={`size-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
+            <RefreshCwIcon className={`size-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button asChild>
+            <a href="/lead-lists/upload">
+              <UploadCloudIcon className="size-4 mr-2" />
+              Upload List
+            </a>
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -289,30 +349,58 @@ export default function LeadListsPage() {
                               Mark Uploaded
                             </Button>
                           )}
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
-                                <TrashIcon className="size-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Lead List?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will remove "{list.fileName}" from the list. This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-red-500 hover:bg-red-600"
-                                  onClick={() => handleDelete(list.id)}
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          {list.status === 'scrubbing' ? (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="text-orange-500 hover:text-orange-600 border-orange-500/50 hover:border-orange-500">
+                                  <XCircleIcon className="size-4 mr-1" />
+                                  Cancel
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Cancel Scrubbing?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will cancel the scrubbing process for "{list.fileName}" and remove it from the list. This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Keep Scrubbing</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-orange-500 hover:bg-orange-600"
+                                    onClick={() => handleCancel(list.id)}
+                                  >
+                                    Cancel Scrubbing
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          ) : (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
+                                  <TrashIcon className="size-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Lead List?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will remove "{list.fileName}" from the list. This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-red-500 hover:bg-red-600"
+                                    onClick={() => handleDelete(list.id)}
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
