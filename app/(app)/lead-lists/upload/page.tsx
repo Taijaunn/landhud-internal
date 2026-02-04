@@ -194,7 +194,7 @@ export default function UploadLeadListPage() {
     setTimeout(poll, 3000)
   }, [])
 
-  // Submit form
+  // Submit form - uploads directly to Supabase, then calls API for record creation
   const handleSubmit = useCallback(async () => {
     if (!file || !county || !state) {
       setProcessingStatus({
@@ -209,34 +209,76 @@ export default function UploadLeadListPage() {
     setProcessingStatus({
       status: 'uploading',
       progress: 10,
-      message: 'Uploading file...',
+      message: 'Uploading file to storage...',
     })
 
     try {
-      // Create form data
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('county', county)
-      formData.append('state', state)
-      if (notes) {
-        formData.append('notes', notes)
+      // Import supabase client dynamically to avoid SSR issues
+      const { supabase } = await import('@/lib/supabase')
+      
+      // Generate unique filename
+      const timestamp = Date.now()
+      const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
+      const sanitizedCounty = county.toLowerCase().replace(/[^a-z0-9]/g, '-')
+      const sanitizedState = state.toLowerCase()
+      const fileName = `${sanitizedCounty}-${sanitizedState}-${timestamp}${fileExtension}`
+
+      setProcessingStatus({
+        status: 'uploading',
+        progress: 30,
+        message: 'Uploading file to storage...',
+      })
+
+      // Upload directly to Supabase Storage (bypasses Vercel's 4.5MB limit)
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('lead-lists')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (uploadError) {
+        throw new Error(`Storage upload failed: ${uploadError.message}`)
       }
 
-      // Upload file
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('lead-lists')
+        .getPublicUrl(fileName)
+
+      const fileUrl = urlData?.publicUrl
+
+      setProcessingStatus({
+        status: 'uploading',
+        progress: 60,
+        message: 'Creating record and triggering processing...',
+      })
+
+      // Call lightweight API to create record and trigger N8N (no file in payload)
       const response = await fetch('/api/lead-lists/upload', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileName,
+          fileUrl,
+          county,
+          state,
+          notes: notes || null,
+          originalFilename: file.name,
+        }),
       })
 
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Upload failed')
+        throw new Error(data.error || 'Failed to create record')
       }
 
       setProcessingStatus({
         status: 'processing',
-        progress: 50,
+        progress: 80,
         message: 'File uploaded! Waiting for N8N to process...',
         recordId: data.recordId,
       })
