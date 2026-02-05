@@ -93,7 +93,9 @@ async function handleN8NCallback(body: any) {
     error_message,
   } = body
 
-  console.log(`[Webhook] N8N callback for record ${record_id}:`, { status, record_count })
+  // Debug: Log the full body to see what N8N is sending
+  console.log(`[Webhook] N8N callback FULL BODY:`, JSON.stringify(body, null, 2))
+  console.log(`[Webhook] N8N callback for record ${record_id}:`, { status, record_count, clean_file_url })
 
   const supabase = createServerClient()
 
