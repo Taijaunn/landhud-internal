@@ -75,58 +75,21 @@ type MenuSection = {
 // Organized menu sections
 const menuSections: MenuSection[] = [
   {
-    icon: BriefcaseIcon,
-    label: 'Operations',
+    icon: ContactIcon,
+    label: 'CRM',
     roles: ['admin', 'sms_va', 'underwriter'],
     items: [
       {
         icon: ChartColumnStackedIcon,
         label: 'Dashboard',
-        href: '/dashboard',
-        roles: ['admin', 'sms_va', 'underwriter']
-      },
-      {
-        icon: UsersIcon,
-        label: 'Submit Lead',
-        href: '/leads',
-        roles: ['admin', 'sms_va']
-      },
-      {
-        icon: SearchIcon,
-        label: 'Valuations',
-        href: '/valuations',
-        roles: ['admin', 'underwriter']
-      },
-      {
-        icon: FileSpreadsheetIcon,
-        label: 'Lead Lists',
-        href: '/lead-lists',
-        roles: ['admin', 'sms_va']
-      },
-      {
-        icon: DatabaseIcon,
-        label: 'Records',
-        href: '/records',
-        roles: ['admin', 'sms_va', 'underwriter']
-      }
-    ]
-  },
-  {
-    icon: ContactIcon,
-    label: 'CRM',
-    roles: ['admin', 'sms_va'],
-    items: [
-      {
-        icon: ChartColumnStackedIcon,
-        label: 'Overview',
         href: '/crm',
-        roles: ['admin', 'sms_va']
+        roles: ['admin', 'sms_va', 'underwriter']
       },
       {
         icon: UsersIcon,
-        label: 'All Leads',
+        label: 'Leads',
         href: '/crm/leads',
-        roles: ['admin', 'sms_va']
+        roles: ['admin', 'sms_va', 'underwriter']
       },
       {
         icon: KanbanIcon,
@@ -138,7 +101,20 @@ const menuSections: MenuSection[] = [
         icon: CalculatorIcon,
         label: 'Comps',
         href: '/crm/comps',
-        roles: ['admin']
+        roles: ['admin', 'underwriter']
+      }
+    ]
+  },
+  {
+    icon: BriefcaseIcon,
+    label: 'Operations',
+    roles: ['admin', 'sms_va'],
+    items: [
+      {
+        icon: FileSpreadsheetIcon,
+        label: 'Lead Lists',
+        href: '/lead-lists',
+        roles: ['admin', 'sms_va']
       }
     ]
   },
@@ -181,12 +157,6 @@ const adminSection: MenuSection = {
   label: 'Admin',
   roles: ['admin'],
   items: [
-    {
-      icon: ClipboardListIcon,
-      label: 'All Leads',
-      href: '/admin/leads',
-      roles: ['admin']
-    },
     {
       icon: SettingsIcon,
       label: 'Settings',
