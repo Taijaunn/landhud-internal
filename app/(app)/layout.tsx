@@ -115,6 +115,12 @@ const menuSections: MenuSection[] = [
         label: 'Lead Lists',
         href: '/lead-lists',
         roles: ['admin', 'sms_va']
+      },
+      {
+        icon: ClipboardListIcon,
+        label: 'Send Contract',
+        href: '/send-contract',
+        roles: ['admin', 'sms_va']
       }
     ]
   },

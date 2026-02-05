@@ -29,6 +29,7 @@ import {
   BuildingIcon,
   CalculatorIcon,
   ExternalLinkIcon,
+  FileTextIcon,
 } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -347,6 +348,14 @@ export default function LeadDetailPage() {
           }}>
             <ActivityIcon className="size-4 mr-2" />
             Activity
+          </Button>
+
+          {/* Send Contract */}
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/send-contract?leadId=${lead.id}`}>
+              <FileTextIcon className="size-4 mr-2" />
+              Contract
+            </Link>
           </Button>
 
           {/* More Menu */}
