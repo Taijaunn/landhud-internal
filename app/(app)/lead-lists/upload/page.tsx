@@ -241,12 +241,16 @@ export default function UploadLeadListPage() {
         throw new Error(`Storage upload failed: ${uploadError.message}`)
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
+      // Get signed URL (works even if bucket is private) - valid for 1 hour
+      const { data: urlData, error: urlError } = await supabase.storage
         .from('lead-lists')
-        .getPublicUrl(fileName)
+        .createSignedUrl(fileName, 3600) // 1 hour expiry
 
-      const fileUrl = urlData?.publicUrl
+      if (urlError || !urlData?.signedUrl) {
+        throw new Error(`Failed to get signed URL: ${urlError?.message || 'Unknown error'}`)
+      }
+
+      const fileUrl = urlData.signedUrl
 
       setProcessingStatus({
         status: 'uploading',
