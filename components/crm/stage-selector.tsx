@@ -89,62 +89,6 @@ export function StageSelector({
   )
 }
 
-// Stage Progress Bar (visual indicator)
-export function StageProgressBar({ currentStage }: { currentStage: PipelineStage }) {
-  const stages = Object.keys(PIPELINE_STAGES) as PipelineStage[]
-  const currentIndex = stages.indexOf(currentStage)
-  
-  // Filter to main progression stages (exclude closed states)
-  const progressStages = stages.filter(s => !['closed_won', 'closed_lost', 'dead'].includes(s))
-  const progressIndex = progressStages.indexOf(currentStage)
-  const progress = progressIndex >= 0 
-    ? ((progressIndex + 1) / progressStages.length) * 100 
-    : 100
-
-  const isClosed = ['closed_won', 'closed_lost', 'dead'].includes(currentStage)
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-foreground">Pipeline Progress</span>
-        <Badge 
-          variant="outline" 
-          className={`${PIPELINE_STAGES[currentStage].bgColor} ${PIPELINE_STAGES[currentStage].color} border-0`}
-        >
-          {PIPELINE_STAGES[currentStage].label}
-        </Badge>
-      </div>
-      <div className="h-2 bg-muted rounded-full overflow-hidden">
-        <div 
-          className={`h-full transition-all duration-300 ${
-            isClosed 
-              ? currentStage === 'closed_won' 
-                ? 'bg-green-500' 
-                : 'bg-gray-400'
-              : 'bg-primary'
-          }`}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      <div className="flex justify-between text-xs text-muted-foreground">
-        {progressStages.map((stage, index) => (
-          <div 
-            key={stage}
-            className={`${
-              index <= progressIndex || isClosed
-                ? 'text-foreground font-medium' 
-                : ''
-            }`}
-          >
-            {index === 0 && 'New'}
-            {index === progressStages.length - 1 && 'Contract'}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 // Inline stage badges (for lists)
 export function StageBadge({ stage, size = 'sm' }: { stage: PipelineStage; size?: 'sm' | 'md' }) {
   const config = PIPELINE_STAGES[stage]
