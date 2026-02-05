@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -52,7 +52,34 @@ import { useCRMStore } from '@/lib/data/crm-store'
 import { useUserStore } from '@/lib/data/store'
 import { PIPELINE_STAGES, LEAD_SOURCES, type PipelineStage, type LeadSource, type CRMLead } from '@/lib/types/crm'
 
+// Wrapper with Suspense for useSearchParams
 export default function CRMLeadsPage() {
+  return (
+    <Suspense fallback={<CRMLeadsPageSkeleton />}>
+      <CRMLeadsPageContent />
+    </Suspense>
+  )
+}
+
+function CRMLeadsPageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <div className="h-8 w-32 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-48 bg-muted rounded animate-pulse" />
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-48 bg-muted rounded animate-pulse" />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CRMLeadsPageContent() {
   const searchParams = useSearchParams()
   const { 
     leads, 
