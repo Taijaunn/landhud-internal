@@ -20,7 +20,11 @@ import {
   FileTextIcon,
   GraduationCapIcon,
   ShieldIcon,
-  DatabaseIcon
+  DatabaseIcon,
+  ContactIcon,
+  KanbanIcon,
+  MessageSquareIcon,
+  CalculatorIcon,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -104,6 +108,37 @@ const menuSections: MenuSection[] = [
         label: 'Records',
         href: '/records',
         roles: ['admin', 'sms_va', 'underwriter']
+      }
+    ]
+  },
+  {
+    icon: ContactIcon,
+    label: 'CRM',
+    roles: ['admin', 'sms_va'],
+    items: [
+      {
+        icon: ChartColumnStackedIcon,
+        label: 'Overview',
+        href: '/crm',
+        roles: ['admin', 'sms_va']
+      },
+      {
+        icon: UsersIcon,
+        label: 'All Leads',
+        href: '/crm/leads',
+        roles: ['admin', 'sms_va']
+      },
+      {
+        icon: KanbanIcon,
+        label: 'Pipeline',
+        href: '/crm/pipeline',
+        roles: ['admin', 'sms_va']
+      },
+      {
+        icon: CalculatorIcon,
+        label: 'Comps',
+        href: '/crm/comps',
+        roles: ['admin']
       }
     ]
   },
