@@ -55,6 +55,7 @@ import { StageSelector, StageProgressBar } from '@/components/crm/stage-selector
 import { ActivityTimeline } from '@/components/crm/activity-timeline'
 import { CommunicationPanel } from '@/components/crm/communication-panel'
 import { NotesSection } from '@/components/crm/notes-section'
+import { CompFormDialog } from '@/components/crm/comp-form-dialog'
 
 import { useCRMStore } from '@/lib/data/crm-store'
 import { useUserStore } from '@/lib/data/store'
@@ -437,10 +438,12 @@ export default function LeadDetailPage() {
                       <CardTitle className="text-base">Property Comps</CardTitle>
                       <CardDescription>Valuations from underwriters</CardDescription>
                     </div>
-                    <Button size="sm">
-                      <PlusIcon className="size-4 mr-2" />
-                      Add Comp
-                    </Button>
+                    <CompFormDialog
+                      leadId={lead.id}
+                      propertyAcreage={lead.acreage}
+                      userId={currentUserId}
+                      userName={currentUserName}
+                    />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -451,27 +454,105 @@ export default function LeadDetailPage() {
                       <p className="text-sm">Add valuations from underwriters</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
+                      {/* Summary Stats */}
+                      {lead.comps.length > 1 && (
+                        <div className="p-4 bg-blue-500/10 rounded-lg">
+                          <p className="text-sm font-medium text-blue-600 mb-2">
+                            {lead.comps.length} Valuations Submitted
+                          </p>
+                          <div className="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Low</p>
+                              <p className="font-semibold">
+                                ${Math.min(...lead.comps.map(c => c.comp_value)).toLocaleString()}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Average</p>
+                              <p className="font-semibold text-blue-600">
+                                ${Math.round(lead.comps.reduce((sum, c) => sum + c.comp_value, 0) / lead.comps.length).toLocaleString()}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">High</p>
+                              <p className="font-semibold">
+                                ${Math.max(...lead.comps.map(c => c.comp_value)).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Individual Comps */}
                       {lead.comps.map((comp) => (
-                        <div key={comp.id} className="p-4 border rounded-lg">
+                        <div key={comp.id} className="p-4 border rounded-lg space-y-4">
                           <div className="flex items-start justify-between">
                             <div>
                               <p className="font-medium">{comp.comper_name}</p>
                               <p className="text-2xl font-bold text-green-600">
                                 ${comp.comp_value.toLocaleString()}
                               </p>
-                              {comp.confidence_level && (
-                                <Badge variant="outline" className="mt-1">
-                                  {comp.confidence_level} confidence
-                                </Badge>
-                              )}
+                              <div className="flex items-center gap-2 mt-1">
+                                {comp.confidence_level && (
+                                  <Badge 
+                                    variant="outline" 
+                                    className={
+                                      comp.confidence_level === 'high' ? 'border-green-500 text-green-600' :
+                                      comp.confidence_level === 'medium' ? 'border-yellow-500 text-yellow-600' :
+                                      'border-gray-500 text-gray-600'
+                                    }
+                                  >
+                                    {comp.confidence_level} confidence
+                                  </Badge>
+                                )}
+                                {comp.methodology && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {comp.methodology}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <p className="text-sm text-muted-foreground">
                               {format(new Date(comp.created_at), 'MMM d, yyyy')}
                             </p>
                           </div>
+
+                          {/* Comparable Sales */}
+                          {comp.comparable_sales && comp.comparable_sales.length > 0 && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium">Comparable Sales Used:</p>
+                              <div className="space-y-2">
+                                {comp.comparable_sales.map((sale, index) => (
+                                  <div key={index} className="p-2 bg-muted/50 rounded text-sm">
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <p className="font-medium">{sale.address}</p>
+                                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                          <span>{sale.acreage} acres</span>
+                                          <span>Sold {format(new Date(sale.sale_date), 'MMM yyyy')}</span>
+                                          {sale.distance_miles && (
+                                            <span>{sale.distance_miles} mi away</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="font-semibold">${sale.sale_price.toLocaleString()}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                          ${sale.price_per_acre.toLocaleString()}/acre
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {comp.notes && (
-                            <p className="text-sm text-muted-foreground mt-2">{comp.notes}</p>
+                            <p className="text-sm text-muted-foreground border-t pt-3">
+                              {comp.notes}
+                            </p>
                           )}
                         </div>
                       ))}
